@@ -52,6 +52,7 @@ export default class VerificationField extends Component {
     super();
     
     this.state = {
+      centerLocations = centerLocations,
       email: 'dr.li@ardentacademy.com',
       password: 'ardent-staff',
     };
@@ -60,7 +61,10 @@ export default class VerificationField extends Component {
   render() {
     const { email, password } = this.state;
     const { width, onSubmit, captureView, incorrectLogin } = this.props;
-    
+    let selectLocations = this.state.centerLocations.map((key) => {
+      return (<Picker.Item label={this.props.options[key]} value={key} key={key}/>
+    )});
+
     return (
       <View>
         <Picker
@@ -77,13 +81,8 @@ export default class VerificationField extends Component {
           shadowRadius: 6,
         }}
           selectedValue={this.state.selected}
-          onValueChange={Object.keys(centerLocations).map((key) => {
-            return (<Picker.Item label={this.props.options[key]} value={key} key={key}/>)
-          })}>
-
-          <Picker.Item label="All" value="all" />
-          <Picker.Item label="XXXXXX" value="XXXXXX" />
-          
+          onValueChange={(centerLocations) => ( this.setState({selected:centerLocations}))}>
+          {selectLocations}
         </Picker>
         <TextInput
           style={{
