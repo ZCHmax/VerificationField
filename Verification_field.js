@@ -4,30 +4,54 @@ import {
   View,
   TextInput,
   Picker,
+  Text,
 } from 'react-native';
 import gql from "graphql-tag";
+import { ApolloProvider, Query } from "react-apollo";
 
 import { TextButton } from '../components';
 import { colors } from '../resources';
+import { client } from '../services/ardent-api';
 
 
 // Get all the locations
 const GET_LOCATIONS = gql`
-  { 
-    centerLocations
-	  {
+  query { 
+    centerLocations {
+      id
   	  name
     }
   }
 `;
 
-const centerLocations = () => (
+
+const CenterLocationPicker = ({ width, incorrectLogin, selectedValue, onValueChange }) => (
   <Query query={GET_LOCATIONS}>
     {({ loading, error, data }) => {
-      if (loading) return "Loading...";
-      if (error) return `Error! ${error.message}`;
-
-      return <locationList locations = {data.locations} />      
+      if (loading) return <Text>"Loading..."</Text>;
+      if (error) return <Text>{`Error! ${error.message}`}</Text>;
+      return (
+        <Picker
+          style={{
+            height: 40,
+            width,
+            backgroundColor: incorrectLogin ? 'rgb(255, 221, 221)' : 'white',
+            borderWidth: 0.5,
+            borderColor: incorrectLogin ? 'red' : 'rgb(130, 130, 130)',
+            alignSelf: 'center',
+            marginBottom: 10,
+            shadowColor: 'black',
+            shadowOpacity: 0.1,
+            shadowRadius: 6,
+          }}
+          selectedValue={selectedValue}
+          onValueChange={centerLocation => onValueChange(centerLocation)}
+        >
+          {data.centerLocations.map(centerLocation => {
+            return <Picker.Item label={centerLocation.name} value={centerLocation} key={centerLocation.id}/>
+          })}
+        </Picker>
+      )
     }}
   </Query>
 );
@@ -52,7 +76,6 @@ export default class VerificationField extends Component {
     super();
     
     this.state = {
-      centerLocations = centerLocations,
       email: 'dr.li@ardentacademy.com',
       password: 'ardent-staff',
     };
@@ -61,29 +84,17 @@ export default class VerificationField extends Component {
   render() {
     const { email, password } = this.state;
     const { width, onSubmit, captureView, incorrectLogin } = this.props;
-    let selectLocations = this.state.centerLocations.map((key) => {
-      return (<Picker.Item label={this.props.options[key]} value={key} key={key}/>
-    )});
 
     return (
       <View>
-        <Picker
-          style={{
-          height: 40,
-          width,
-          backgroundColor: incorrectLogin ? 'rgb(255, 221, 221)' : 'white',
-          borderWidth: 0.5,
-          borderColor: incorrectLogin ? 'red' : 'rgb(130, 130, 130)',
-          alignSelf: 'center',
-          marginBottom: 10,
-          shadowColor: 'black',
-          shadowOpacity: 0.1,
-          shadowRadius: 6,
-        }}
+        <ApolloProvider client={client}>
+        <CenterLocationPicker
+          width={this.props.width}
+          incorrectLogin={this.props.incorrectLogin}
           selectedValue={this.state.selected}
-          onValueChange={(centerLocations) => ( this.setState({selected:centerLocations}))}>
-          {selectLocations}
-        </Picker>
+          onValueChange={centerLocation => this.setState({ selected: centerLocation })}
+        />
+        </ApolloProvider>
         <TextInput
           style={{
             height: 40,
