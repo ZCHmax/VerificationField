@@ -3,11 +3,11 @@ import PropTypes from 'prop-types';
 import {
   View,
   TextInput,
-  Picker,
   Text,
 } from 'react-native';
 import gql from "graphql-tag";
 import { ApolloProvider, Query } from "react-apollo";
+import { Picker } from 'react-native-picker-dropdown';
 
 import { TextButton } from '../components';
 import { colors } from '../resources';
@@ -23,7 +23,6 @@ const GET_LOCATIONS = gql`
     }
   }
 `;
-
 
 const CenterLocationPicker = ({ width, incorrectLogin, selectedValue, onValueChange }) => (
   <Query query={GET_LOCATIONS}>
@@ -56,6 +55,14 @@ const CenterLocationPicker = ({ width, incorrectLogin, selectedValue, onValueCha
   </Query>
 );
 
+// need to change the style
+const styles = StyleSheet.create({
+  text: {
+     fontSize: 30,
+     alignSelf: 'center',
+     color: 'black'
+  }
+})
 
 // Used for the login screen.
 export default class VerificationField extends Component {
@@ -94,6 +101,7 @@ export default class VerificationField extends Component {
           selectedValue={this.state.selected}
           onValueChange={centerLocation => this.setState({ selected: centerLocation })}
         />
+        <Text style = {styles.text}>{this.state.user}</Text>
         </ApolloProvider>
         <TextInput
           style={{
